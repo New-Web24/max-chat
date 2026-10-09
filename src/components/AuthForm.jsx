@@ -1,3 +1,4 @@
+import { Button, Flex, Input, Panel, Typography } from "@maxhub/max-ui";
 import { useState } from "react";
 
 const DEFAULT_API_URL = "https://3100.api.green-api.com";
@@ -11,7 +12,7 @@ export function AuthForm({ onAuth }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const trimmedApiUrl = apiUrl.trim().replace(/\/$/, ""); // убираем слэш в конце
+    const trimmedApiUrl = apiUrl.trim().replace(/\/$/, "");
     const trimmedId = idInstance.trim();
     const trimmedToken = apiTokenInstance.trim();
 
@@ -29,50 +30,76 @@ export function AuthForm({ onAuth }) {
   };
 
   return (
-    <div className="auth-screen">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>MAX Chat</h1>
-        <p className="auth-form__hint">
-          Введите данные из личного кабинета GREEN-API
-        </p>
+    <Flex
+      align="center"
+      justify="center"
+      style={{
+        height: "100vh",
+        padding: 20,
+        background: "var(--vkui--color_background_secondary, #f5f6f8)",
+      }}
+    >
+      <Panel
+        mode="primary"
+        style={{
+          width: "100%",
+          maxWidth: 420,
+          padding: 32,
+          borderRadius: 16,
+        }}
+      >
+        <form onSubmit={handleSubmit}>
+          <Flex direction="column" gap={20}>
+            <Flex direction="column" gap={4} align="center">
+              <Typography.Title>MAX Chat</Typography.Title>
+              <Typography.Label>
+                Введите данные из личного кабинета GREEN-API
+              </Typography.Label>
+            </Flex>
 
-        <label className="auth-form__field">
-          <span>API URL</span>
-          <input
-            type="text"
-            value={apiUrl}
-            onChange={(e) => setApiUrl(e.target.value)}
-            placeholder="https://3100.api.green-api.com"
-            autoComplete="off"
-          />
-        </label>
+            <Flex direction="column" gap={4}>
+              <Typography.Label>API URL</Typography.Label>
+              <Input
+                value={apiUrl}
+                onChange={(e) => setApiUrl(e.target.value)}
+                placeholder="https://3100.api.green-api.com"
+                size="medium"
+              />
+            </Flex>
 
-        <label className="auth-form__field">
-          <span>idInstance</span>
-          <input
-            type="text"
-            value={idInstance}
-            onChange={(e) => setIdInstance(e.target.value)}
-            placeholder="310022760231"
-            autoComplete="off"
-          />
-        </label>
+            <Flex direction="column" gap={4}>
+              <Typography.Label>idInstance</Typography.Label>
+              <Input
+                value={idInstance}
+                onChange={(e) => setIdInstance(e.target.value)}
+                placeholder="310022760231"
+                size="medium"
+              />
+            </Flex>
 
-        <label className="auth-form__field">
-          <span>apiTokenInstance</span>
-          <input
-            type="password"
-            value={apiTokenInstance}
-            onChange={(e) => setApiTokenInstance(e.target.value)}
-            placeholder="Вставьте токен"
-            autoComplete="off"
-          />
-        </label>
+            <Flex direction="column" gap={4}>
+              <Typography.Label>apiTokenInstance</Typography.Label>
+              <Input
+                type="password"
+                value={apiTokenInstance}
+                onChange={(e) => setApiTokenInstance(e.target.value)}
+                placeholder="Вставьте токен"
+                size="medium"
+              />
+            </Flex>
 
-        {error && <p className="auth-form__error">{error}</p>}
+            {error && (
+              <Typography.Label style={{ color: "#e53935" }}>
+                {error}
+              </Typography.Label>
+            )}
 
-        <button type="submit">Подключиться</button>
-      </form>
-    </div>
+            <Button type="submit" variant="primary" size="large" stretched>
+              Подключиться
+            </Button>
+          </Flex>
+        </form>
+      </Panel>
+    </Flex>
   );
 }

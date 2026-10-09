@@ -1,9 +1,9 @@
+import { Typography } from "@maxhub/max-ui";
 import { useEffect, useRef } from "react";
 
 export function MessageList({ messages }) {
   const bottomRef = useRef(null);
 
-  // Автопрокрутка вниз при появлении новых сообщений
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -11,7 +11,7 @@ export function MessageList({ messages }) {
   if (!messages.length) {
     return (
       <div className="message-list message-list--empty">
-        <p>Нет сообщений. Напишите первым!</p>
+        <Typography.Label>Нет сообщений. Напишите первым!</Typography.Label>
       </div>
     );
   }

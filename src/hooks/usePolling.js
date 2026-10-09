@@ -25,25 +25,36 @@ export function usePolling({ credentials, onIncomingMessage, enabled }) {
       try {
         const notification = await receiveNotification(credentials);
 
-        if (notification && notification.body) {
-          const { typeWebhook, messageData } = notification.body;
+        if (!notification) {
+          return;
+        }
 
-          // Только входящие текстовые сообщения
-          if (
-            typeWebhook === "incomingMessageReceived" &&
-            messageData?.typeMessage === "textMessage"
-          ) {
+        const { receiptId, body } = notification;
+
+        console.log("[Webhook]", body?.typeWebhook, body);
+
+        if (body?.typeWebhook === "incomingMessageReceived") {
+          const chatId = body.senderData?.chatId;
+          const text = body.messageData?.textMessageData?.textMessage;
+
+          if (chatId && text) {
             onMessageRef.current?.({
-              chatId: messageData.senderData?.chatId,
-              text: messageData.textMessageData?.textMessage ?? "",
+              chatId: String(chatId),
+              text,
             });
           }
+        }
 
-          // Подтверждаем обработку (обязательно, иначе очередь забьётся)
+        try {
           await deleteNotification({
             ...credentials,
-            receiptId: notification.receiptId,
+            receiptId,
           });
+        } catch (error) {
+          console.error(
+            "[DeleteNotification] Не удалось удалить уведомление:",
+            error,
+          );
         }
       } catch (err) {
         console.error("[usePolling] error:", err);

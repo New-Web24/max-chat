@@ -1,3 +1,4 @@
+import { Button, Flex, Panel, Typography } from "@maxhub/max-ui";
 import { useCallback, useState } from "react";
 import { AuthForm } from "./components/AuthForm";
 import { MessageInput } from "./components/MessageInput";
@@ -5,7 +6,6 @@ import { MessageList } from "./components/MessageList";
 import { NewChatForm } from "./components/NewChatForm";
 import { usePolling } from "./hooks/usePolling";
 import { sendMessage } from "./services/greenApi";
-
 export default function App() {
   const [credentials, setCredentials] = useState(null);
   const [chats, setChats] = useState([]); // [{ chatId, messages: [{text, incoming}] }]
@@ -18,20 +18,34 @@ export default function App() {
   const handleIncoming = useCallback(({ chatId, text }) => {
     if (!chatId || !text) return;
 
+    const normalizedChatId = String(chatId);
+
     setChats((prev) => {
-      const existing = prev.find((c) => c.chatId === chatId);
+      const existing = prev.find(
+        (chat) => String(chat.chatId) === normalizedChatId,
+      );
+
       if (existing) {
-        return prev.map((c) =>
-          c.chatId === chatId
-            ? { ...c, messages: [...c.messages, { text, incoming: true }] }
-            : c,
+        return prev.map((chat) =>
+          String(chat.chatId) === normalizedChatId
+            ? {
+                ...chat,
+                messages: [...chat.messages, { text, incoming: true }],
+              }
+            : chat,
         );
       }
-      return [...prev, { chatId, messages: [{ text, incoming: true }] }];
+
+      return [
+        ...prev,
+        {
+          chatId: normalizedChatId,
+          messages: [{ text, incoming: true }],
+        },
+      ];
     });
 
-    // Если чат пришёл первым — делаем его активным
-    setActiveChatId((current) => current ?? chatId);
+    setActiveChatId((current) => current ?? normalizedChatId);
   }, []);
 
   usePolling({
@@ -41,11 +55,25 @@ export default function App() {
   });
 
   // Создание нового чата
-  const handleCreateChat = (chatId) => {
+  const handleCreateChat = async (chatIdInput) => {
+    if (!credentials) {
+      throw new Error("Нет авторизации");
+    }
+
+    const chatId = chatIdInput.trim();
+
+    if (!chatId) {
+      throw new Error("Укажите номер телефона или ID чата");
+    }
+
     setChats((prev) => {
-      if (prev.find((c) => c.chatId === chatId)) return prev;
+      if (prev.some((chat) => chat.chatId === chatId)) {
+        return prev;
+      }
+
       return [...prev, { chatId, messages: [] }];
     });
+
     setActiveChatId(chatId);
   };
 
@@ -88,13 +116,17 @@ export default function App() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <header className="sidebar__header">
-          <h2>MAX Chat</h2>
-          <button className="sidebar__logout" onClick={handleLogout}>
+      <Panel mode="secondary" className="sidebar">
+        <Flex
+          align="center"
+          justify="space-between"
+          className="sidebar__header"
+        >
+          <Typography.Title>MAX Chat</Typography.Title>
+          <Button variant="ghost" size="small" onClick={handleLogout}>
             Выйти
-          </button>
-        </header>
+          </Button>
+        </Flex>
 
         <NewChatForm onCreate={handleCreateChat} />
 
@@ -107,30 +139,38 @@ export default function App() {
               }`}
               onClick={() => setActiveChatId(c.chatId)}
             >
-              <span className="chat-list__id">{c.chatId}</span>
+              <Typography.Label>{c.chatId}</Typography.Label>
               {c.messages.length > 0 && (
-                <span className="chat-list__preview">
+                <Typography.Label style={{ fontSize: 13, opacity: 0.6 }}>
                   {c.messages[c.messages.length - 1].text.slice(0, 40)}
-                </span>
+                </Typography.Label>
               )}
             </li>
           ))}
           {chats.length === 0 && (
-            <li className="chat-list__empty">Нет чатов. Создайте первый.</li>
+            <li className="chat-list__empty">
+              <Typography.Label style={{ opacity: 0.6 }}>
+                Нет чатов. Создайте первый.
+              </Typography.Label>
+            </li>
           )}
         </ul>
-      </aside>
+      </Panel>
 
       <main className="chat-area">
         {activeChat ? (
           <>
-            <header className="chat-area__header">{activeChat.chatId}</header>
+            <Flex align="center" className="chat-area__header">
+              <Typography.Label>{activeChat.chatId}</Typography.Label>
+            </Flex>
             <MessageList messages={activeChat.messages} />
             <MessageInput onSend={handleSend} disabled={sending} />
           </>
         ) : (
           <div className="chat-area__placeholder">
-            Выберите чат или создайте новый
+            <Typography.Label style={{ opacity: 0.6 }}>
+              Выберите чат или создайте новый
+            </Typography.Label>
           </div>
         )}
       </main>

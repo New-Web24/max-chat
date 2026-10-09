@@ -1,16 +1,52 @@
-# React + Vite
+# MAX Chat
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Тестовое задание: веб-интерфейс для отправки и получения текстовых сообщений
+в мессенджере MAX через [GREEN-API](https://green-api.com/max).
 
-Currently, two official plugins are available:
+## Демо
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Стек**: React 18 + Vite + [MAX UI](https://dev.max.ru/ui)
+- **API**: GREEN-API v3 (MAX)
 
-## React Compiler
+## Возможности
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Авторизация по `apiUrl` / `idInstance` / `apiTokenInstance`
+- Создание чата по номеру телефона с резолвом `chatId` через `CheckAccount`
+- Отправка текстовых сообщений (`SendMessage`)
+- Приём входящих сообщений через HTTP API (`ReceiveNotification` + `DeleteNotification`)
+- Интерфейс на компонентах MAX UI
+- Сохранение credentials в `localStorage`
 
-## Expanding the ESLint configuration
+## Запуск
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm install
+npm run dev
+```
+
+Открой http://localhost:5173
+
+## Настройка инстанса GREEN-API
+
+Перед использованием убедись, что в личном кабинете GREEN-API:
+
+- `webhookUrl` — **пустой** (иначе уведомления уходят на вебхук, а не в HTTP API)
+- `incomingWebhook` — **включён**
+
+## Архитектура
+
+```
+src/
+├── components/    # UI-компоненты (AuthForm, ChatList, MessageList, MessageInput, NewChatForm)
+├── hooks/         # usePolling — опрос входящих сообщений
+├── services/      # greenApi — обёртка над REST API GREEN-API
+├── img/           # Фоновые изображения
+├── App.jsx        # Состояние чатов и логика
+└── main.jsx       # Провайдер MAX UI + рендер
+```
+
+## Ограничения
+
+- Только текстовые сообщения
+- Поллинг входящих раз в 2.5 секунды (HTTP API, без webhook)
+- Credentials хранятся в `localStorage`

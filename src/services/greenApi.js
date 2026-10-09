@@ -35,19 +35,24 @@ export async function receiveNotification({
   idInstance,
   apiTokenInstance,
 }) {
-  const url = `${apiUrl}/waInstance${idInstance}/receiveNotification/${apiTokenInstance}`;
+  const url =
+    `${apiUrl}/waInstance${idInstance}` +
+    `/receiveNotification/${apiTokenInstance}?receiveTimeout=5`;
+
   const response = await fetch(url);
 
+  const text = await response.text();
+
   if (!response.ok) {
-    throw new Error(`ReceiveNotification failed (${response.status})`);
+    throw new Error(`ReceiveNotification failed (${response.status}): ${text}`);
   }
 
-  const text = await response.text();
-  if (!text || text === "null") return null;
+  if (!text || text.trim() === "null") {
+    return null;
+  }
 
   return JSON.parse(text);
 }
-
 /**
  * Удаление обработанного уведомления из очереди
  */

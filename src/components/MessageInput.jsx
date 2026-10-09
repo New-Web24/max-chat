@@ -1,3 +1,4 @@
+import { Button, Flex, Input } from "@maxhub/max-ui";
 import { useState } from "react";
 
 export function MessageInput({ onSend, disabled }) {
@@ -13,16 +14,25 @@ export function MessageInput({ onSend, disabled }) {
 
   return (
     <form className="message-input" onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="Введите сообщение..."
-        disabled={disabled}
-      />
-      <button type="submit" disabled={disabled || !text.trim()}>
-        Отправить
-      </button>
+      <Flex gap={10} align="center" style={{ width: "100%" }}>
+        <div style={{ flex: 1 }}>
+          <Input
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Введите сообщение..."
+            size="medium"
+            disabled={disabled}
+          />
+        </div>
+        <Button
+          type="submit"
+          variant="primary"
+          size="small"
+          disabled={disabled || !text.trim()}
+        >
+          Отправить
+        </Button>
+      </Flex>
     </form>
   );
 }
